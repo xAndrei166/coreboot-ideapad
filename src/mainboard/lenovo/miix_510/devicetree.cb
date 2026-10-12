@@ -47,23 +47,35 @@ chip soc/intel/skylake
 	device domain 0 on
 		device ref igpu		on  end
 		device ref sa_thermal	on  end
+		device ref imgu		on  end # Imaging Unit (ISP 00:05.0), enabled on stock firmware
 		device ref south_xhci	on  end
 		device ref south_xdci	off end
 		device ref thermal	on  end
-		device ref i2c0		on  end # Bosch BOSC0200 accelerometer (0x18)
-		device ref i2c1		on  end # Wacom WCOM508C/D digitizer (0x0A), Semtech SX9500 (0x6E)
+		device ref cio		on  end # CSI-2 camera host (00:14.3). Drives FSP PchCio2Enable
+		device ref i2c0		on  end # Bosch BOSC0200 accelerometer (0x18), touchpad slot
+		device ref i2c1		on  end # Wacom WCOM508C touchscreen/pen digitizer (0x4C)
 		device ref i2c2		on  end
-		device ref i2c3		on  end # FPNT device in stock DSDT
+		device ref i2c3		on  end # Semtech SX9500F1 proximity/SAR sensor
 		device ref heci1	on  end
 		device ref sata		on
 			register "SataPortsEnable" = "{
 				[0] = 1,
 			}"
 		end
-		device ref pcie_rp4	on  end # Intel Wireless 7260
-		device ref pcie_rp9	on  end # Samsung NVMe SSD
+		# The stock firmware exposes the WLAN behind the root port at 00:1c.0
+		# (PCH-LP ports are numbered from 1 at 1c.0), not 1c.3.
+		device ref pcie_rp1	on  end # Intel Wireless 7260
+		device ref pcie_rp9	on  end # Samsung NVMe SSD (00:1d.0)
 		device ref lpc_espi	on
 			register "serirq_mode" = "SERIRQ_CONTINUOUS"
+			# ITE IT85xx EC is reachable over LPC at 0x62/0x66 (ACPI EC
+			# interface, see DSDT H_EC._CRS) plus its SuperIO-style
+			# configuration window and the KBC range. Without these the
+			# PCH does not forward the ports to the EC and the ACPI EC
+			# driver in the OS times out on every transaction.
+			register "lpc_ioe" = "LPC_IOE_EC_62_66 |
+					      LPC_IOE_KBC_60_64 |
+					      LPC_IOE_EC_4E_4F"
 			register "gen1_dec" = "LPC_IO(0x380, 0x4)"
 			register "gen2_dec" = "LPC_IO(0x68, 0x8)"
 		end

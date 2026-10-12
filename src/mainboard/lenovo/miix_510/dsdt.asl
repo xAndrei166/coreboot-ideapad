@@ -22,4 +22,22 @@ DefinitionBlock(
 		#include <soc/intel/skylake/acpi/pch.asl>
 		#include <drivers/intel/gma/acpi/default_brightness_levels.asl>
 	}
+
+	/*
+	 * Fixed power button, as declared by the factory DSDT. The ITE EC
+	 * forwards the button to the PCH PM1 block.
+	 */
+	Scope (\_SB)
+	{
+		Device (PWRB)
+		{
+			Name (_HID, EisaId ("PNP0C0C"))
+			Name (_UID, 0xAA)
+
+			Method (_STA, 0, NotSerialized)
+			{
+				Return (0x0F)
+			}
+		}
+	}
 }
