@@ -9,16 +9,16 @@
 
 void mainboard_memory_init_params(FSPM_UPD *mupd)
 {
-	/* Exact DQ Byte Map extracted from Lenovo Miix 510-12ISK factory BIOS (0x51DF28) */
+	/* Exact DQ Byte Map reversed from Lenovo Miix 510-12ISK factory BIOS (0x51A23E) */
 	const u8 dq_map[2][12] = {
 		{ 0x0F, 0xF0, 0x00, 0xF0, 0x0F, 0xF0, 0x0F, 0x00, 0xFF, 0x00, 0xFF, 0x00 },
-		{ 0x0F, 0xF0, 0x00, 0xF0, 0x0F, 0xF0, 0x0F, 0x00, 0xFF, 0x00, 0xFF, 0x00 },
+		{ 0x33, 0xCC, 0x00, 0xCC, 0x33, 0xCC, 0x33, 0x00, 0xFF, 0x00, 0xFF, 0x00 },
 	};
 
-	/* Exact DQS CPU<>DRAM Map extracted from factory BIOS (0x51DF70) */
+	/* Exact DQS CPU<>DRAM Map reversed from factory BIOS (0x51A268) */
 	const u8 dqs_map[2][8] = {
-		{ 1, 0, 3, 2, 5, 4, 6, 7 },
-		{ 2, 3, 1, 0, 6, 4, 5, 7 },
+		{ 0, 1, 3, 2, 4, 5, 6, 7 },
+		{ 1, 0, 4, 5, 2, 3, 6, 7 },
 	};
 
 	/* RCOMP resistors & targets from factory BIOS (0x51DFD0) */
@@ -44,5 +44,7 @@ void mainboard_memory_init_params(FSPM_UPD *mupd)
 	mem_cfg->CaVrefConfig = 2;
 	mem_cfg->MemorySpdDataLen = CONFIG_DIMM_SPD_SIZE;
 	mem_cfg->MemorySpdPtr00 = spd_ptr;
+	mem_cfg->MemorySpdPtr01 = 0;
 	mem_cfg->MemorySpdPtr10 = spd_ptr;
+	mem_cfg->MemorySpdPtr11 = 0;
 }
