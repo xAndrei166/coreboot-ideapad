@@ -48,7 +48,43 @@ chip soc/intel/skylake
 		device ref igpu		on  end
 		device ref sa_thermal	on  end
 		device ref imgu		on  end # Imaging Unit (ISP 00:05.0), enabled on stock firmware
-		device ref south_xhci	on  end
+		device ref south_xhci	on
+			# coreboot writes PortUsb20Enable/PortUsb30Enable from these
+			# arrays; leaving them empty disables every port in the FSP.
+			# The wired port set is not known from the available dumps
+			# (stock DSDT declares HS01-HS14 / SS01-SS10), so all of them
+			# are enabled. OC_SKIP avoids tying a port to a floating
+			# over-current pin. Narrow this and assign OC0/OC1 (the two
+			# USB2_OCB pads muxed native on stock) once the wiring is known.
+			register "usb2_ports" = "{
+				[0]  = USB2_PORT_MID(OC_SKIP),
+				[1]  = USB2_PORT_MID(OC_SKIP),
+				[2]  = USB2_PORT_MID(OC_SKIP),
+				[3]  = USB2_PORT_MID(OC_SKIP),
+				[4]  = USB2_PORT_MID(OC_SKIP),
+				[5]  = USB2_PORT_MID(OC_SKIP),
+				[6]  = USB2_PORT_MID(OC_SKIP),
+				[7]  = USB2_PORT_MID(OC_SKIP),
+				[8]  = USB2_PORT_MID(OC_SKIP),
+				[9]  = USB2_PORT_MID(OC_SKIP),
+				[10] = USB2_PORT_MID(OC_SKIP),
+				[11] = USB2_PORT_MID(OC_SKIP),
+				[12] = USB2_PORT_MID(OC_SKIP),
+				[13] = USB2_PORT_MID(OC_SKIP),
+			}"
+			register "usb3_ports" = "{
+				[0] = USB3_PORT_DEFAULT(OC_SKIP),
+				[1] = USB3_PORT_DEFAULT(OC_SKIP),
+				[2] = USB3_PORT_DEFAULT(OC_SKIP),
+				[3] = USB3_PORT_DEFAULT(OC_SKIP),
+				[4] = USB3_PORT_DEFAULT(OC_SKIP),
+				[5] = USB3_PORT_DEFAULT(OC_SKIP),
+				[6] = USB3_PORT_DEFAULT(OC_SKIP),
+				[7] = USB3_PORT_DEFAULT(OC_SKIP),
+				[8] = USB3_PORT_DEFAULT(OC_SKIP),
+				[9] = USB3_PORT_DEFAULT(OC_SKIP),
+			}"
+		end
 		device ref south_xdci	off end
 		device ref thermal	on  end
 		device ref cio		on  end # CSI-2 camera host (00:14.3). Drives FSP PchCio2Enable
