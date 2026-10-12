@@ -31,7 +31,7 @@ config FMDFILE
 	default "src/mainboard/\$(CONFIG_MAINBOARD_DIR)/board.fmd"
 
 config CBFS_SIZE
-	default 0x535e00
+	default 0x515e00
 
 config DIMM_MAX
 	default 2
