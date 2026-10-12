@@ -1,0 +1,8 @@
+Category: tablet
+ROM package: SOIC-8
+ROM protocol: SPI
+ROM socketed: n
+Flashrom support: y
+Release year: 2016
+Clone of: none
+Board URL: https://pcsupport.lenovo.com/us/en/products/tablets/miix-series/miix-510-12-isk

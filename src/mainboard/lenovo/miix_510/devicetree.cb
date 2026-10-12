@@ -1,0 +1,74 @@
+## SPDX-License-Identifier: GPL-2.0-only
+
+chip soc/intel/skylake
+
+	# IGD Displays
+	register "gfx" = "GMA_STATIC_DISPLAYS(0)"
+
+	register "panel_cfg" = "{
+		.up_delay_ms		= 200,
+		.down_delay_ms		=  50,
+		.cycle_delay_ms		= 500,
+		.backlight_on_delay_ms	=   1,
+		.backlight_off_delay_ms	= 200,
+		.backlight_pwm_hz	= 200,
+	}"
+
+	register "deep_s3_enable_ac" = "false"
+	register "deep_s3_enable_dc" = "false"
+	register "deep_s5_enable_ac" = "false"
+	register "deep_s5_enable_dc" = "false"
+
+	register "eist_enable" = "true"
+	register "tcc_offset" = "5" # TCC of 95C
+
+	# GPE route
+	register "gpe0_dw0" = "GPP_C"
+	register "gpe0_dw1" = "GPP_D"
+	register "gpe0_dw2" = "GPP_E"
+
+	register "dptf_enable" = "false"
+
+	# FSP Configuration
+	register "DspEnable" = "false"
+	register "IoBufferOwnership" = "0"
+	register "SkipExtGfxScan" = "1"
+	register "SaGv" = "SaGv_Enabled"
+	register "PmConfigSlpS3MinAssert" = "2"
+	register "PmConfigSlpS4MinAssert" = "1"
+	register "PmConfigSlpSusMinAssert" = "3"
+	register "PmConfigSlpAMinAssert" = "3"
+
+	# PL2 override 25W for tablet cooling
+	register "power_limits_config" = "{
+		.tdp_pl2_override = 25,
+	}"
+
+	device domain 0 on
+		device ref igpu		on  end
+		device ref sa_thermal	on  end
+		device ref south_xhci	on  end
+		device ref south_xdci	off end
+		device ref thermal	on  end
+		device ref i2c0		on  end # Wacom Digitizer
+		device ref i2c1		on  end # Touchscreen
+		device ref i2c2		on  end # Bosch Accelerometer
+		device ref i2c3		on  end # Camera sensors
+		device ref heci1	on  end
+		device ref sata		on
+			register "SataPortsEnable" = "{
+				[0] = 1,
+			}"
+		end
+		device ref pcie_rp4	on  end # Intel Wireless 7260
+		device ref pcie_rp9	on  end # Samsung NVMe SSD
+		device ref lpc_espi	on
+			register "serirq_mode" = "SERIRQ_CONTINUOUS"
+			register "gen1_dec" = "LPC_IO(0x380, 0x4)"
+			register "gen2_dec" = "LPC_IO(0x68, 0x8)"
+		end
+		device ref hda		on  end # Realtek ALC269VC
+		device ref smbus	on  end
+		device ref fast_spi	on  end
+	end
+end

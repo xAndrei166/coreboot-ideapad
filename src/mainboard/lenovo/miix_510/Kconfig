@@ -1,0 +1,42 @@
+## SPDX-License-Identifier: GPL-2.0-only
+
+if BOARD_LENOVO_MIIX_510
+
+config BOARD_SPECIFIC_OPTIONS
+	def_bool y
+	select BOARD_ROMSIZE_KB_8192
+	select HAVE_ACPI_RESUME
+	select HAVE_ACPI_TABLES
+	select INTEL_GMA_HAVE_VBT
+	select MAINBOARD_HAS_TPM2
+	select NO_UART_ON_SUPERIO
+	select SOC_INTEL_COMMON_BLOCK_HDA_VERB
+	select SOC_INTEL_SKYLAKE
+	select SYSTEM_TYPE_LAPTOP
+
+config MAINBOARD_DIR
+	default "lenovo/miix_510"
+
+config MAINBOARD_PART_NUMBER
+	default "Miix 510-12ISK"
+
+config VGA_BIOS_ID
+	string
+	default "8086,1916"
+
+config INTEL_GMA_VBT_FILE
+	default "src/mainboard/\$(MAINBOARDDIR)/data.vbt"
+
+config CBFS_SIZE
+	default 0x580000
+
+config DIMM_MAX
+	default 2
+
+config DIMM_SPD_SIZE
+	default 512
+config GENERIC_SPD_BIN
+	string
+	default "src/mainboard/\$(MAINBOARDDIR)/spd.bin"
+
+endif # BOARD_LENOVO_MIIX_510
