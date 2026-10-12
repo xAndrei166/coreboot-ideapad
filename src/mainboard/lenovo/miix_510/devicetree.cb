@@ -50,10 +50,10 @@ chip soc/intel/skylake
 		device ref south_xhci	on  end
 		device ref south_xdci	off end
 		device ref thermal	on  end
-		device ref i2c0		on  end # Wacom Digitizer
-		device ref i2c1		on  end # Touchscreen
-		device ref i2c2		on  end # Bosch Accelerometer
-		device ref i2c3		on  end # Camera sensors
+		device ref i2c0		on  end # Bosch BOSC0200 accelerometer (0x18)
+		device ref i2c1		on  end # Wacom WCOM508C/D digitizer (0x0A), Semtech SX9500 (0x6E)
+		device ref i2c2		on  end
+		device ref i2c3		on  end # FPNT device in stock DSDT
 		device ref heci1	on  end
 		device ref sata		on
 			register "SataPortsEnable" = "{
