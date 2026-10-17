@@ -9,6 +9,7 @@ romstage-y += romstage.c
 ramstage-y += ramstage.c
 ramstage-y += gpio.c
 ramstage-y += hda_verb.c
+ramstage-$(CONFIG_MAINBOARD_USE_LIBGFXINIT) += gma-mainboard.ads
 
 IASL_WARNINGS_LIST += 3133
 
