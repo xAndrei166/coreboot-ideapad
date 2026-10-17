@@ -1,0 +1,62 @@
+#!/bin/busybox sh
+# Minimal LinuxBoot init: dm-verity(erofs) + overlayfs + persist, then switch_root.
+
+/bin/busybox --install -s /bin
+
+mount -t devtmpfs devtmpfs /dev
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+
+# Wait for the NVMe partitions.
+i=0
+while [ $i -lt 100 ]; do
+	[ -b /dev/nvme0n1p2 ] && [ -b /dev/nvme0n1p3 ] && [ -b /dev/nvme0n1p4 ] && break
+	sleep 0.1
+	i=$((i + 1))
+done
+
+# dm-verity over the erofs root (params from the factory LIVI image).
+dmsetup create livi-root --table "0 4194304 verity 1 /dev/nvme0n1p2 /dev/nvme0n1p3 4096 4096 524288 1 sha256 8e867fe6e46d3685bb285252d4fb5a1318992b759a7d2816c5ae81b94e906a4c 7e05d30268c1a56c33533116f353bcaa760ba43afccb9e206849951c2316cc89" || exec sh
+
+# Resolve the dm device node.
+DMROOT=
+for d in /sys/block/dm-*; do
+	[ "$(cat "$d/dm/name" 2>/dev/null)" = "livi-root" ] && DMROOT="/dev/$(basename "$d")"
+done
+[ -n "$DMROOT" ] || { echo "livi-root not found"; exec sh; }
+
+# Read-only erofs as the overlay lower layer.
+mkdir -p /run/livi/lower /run/livi/ram
+mount -t erofs -o ro "$DMROOT" /run/livi/lower || { echo "erofs mount failed"; exec sh; }
+
+# tmpfs as the writable overlay layer.
+mount -t tmpfs -o mode=0755 tmpfs /run/livi/ram
+mkdir -p /run/livi/ram/upper /run/livi/ram/work
+
+# Stack the overlay as the new root.
+mkdir -p /newroot
+mount -t overlay overlay \
+	-o lowerdir=/run/livi/lower,upperdir=/run/livi/ram/upper,workdir=/run/livi/ram/work \
+	/newroot || { echo "overlay mount failed"; exec sh; }
+
+# Persistent state partition.
+mkdir -p /newroot/persist
+mount -t ext4 /dev/nvme0n1p4 /newroot/persist || { echo "persist mount failed"; exec sh; }
+
+# Bind the persistent subtrees into place (best-effort).
+for p in var/log/journal var/lib/bluetooth var/lib/lockdown \
+	home/livi/.config/LIVI home/livi/.local/share/LIVI; do
+	src="/newroot/persist/$p"
+	dst="/newroot/$p"
+	if [ -d "$src" ]; then
+		mkdir -p "$dst"
+		mount --bind "$src" "$dst"
+	fi
+done
+
+# Carry the backing mounts into the new root.
+mkdir -p /newroot/run/livi
+mount --move /run/livi/lower /newroot/run/livi/lower 2>/dev/null || true
+mount --move /run/livi/ram /newroot/run/livi/ram 2>/dev/null || true
+
+exec switch_root /newroot /sbin/init
