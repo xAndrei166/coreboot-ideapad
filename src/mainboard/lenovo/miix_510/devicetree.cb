@@ -29,15 +29,11 @@ chip soc/intel/skylake
 
 	register "dptf_enable" = "false"
 
-	# Keep the JUART1 debug console alive: FSP-S must not re-mux UART2.
-	# Without this SerialIoDevMode defaults to Disabled and FspSiliconInit
-	# disables the UART, which looks like a hang.
 	register "SerialIoDevMode" = "{
 		[PchSerialIoIndexI2C0] = PchSerialIoPci,
 		[PchSerialIoIndexI2C1] = PchSerialIoPci,
 		[PchSerialIoIndexI2C2] = PchSerialIoPci,
 		[PchSerialIoIndexI2C3] = PchSerialIoPci,
-		[PchSerialIoIndexUart2] = PchSerialIoSkipInit,
 	}"
 
 	# FSP Configuration
@@ -103,7 +99,7 @@ chip soc/intel/skylake
 		device ref i2c1		on  end # Wacom WCOM508C touchscreen/pen digitizer (0x4C)
 		device ref i2c2		on  end
 		device ref i2c3		on  end # Semtech SX9500F1 proximity/SAR sensor
-		device ref uart2	on  end # JUART1 debug console (GPP_C20/C21)
+		device ref uart2	off end
 		device ref heci1	on  end
 		device ref sata		off end # no SATA on Miix 510; suspected FSP-S hang
 		# The stock firmware exposes the WLAN behind the root port at 00:1c.0
