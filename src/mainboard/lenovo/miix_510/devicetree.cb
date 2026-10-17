@@ -97,8 +97,8 @@ chip soc/intel/skylake
 		device ref sata		off end # no SATA on Miix 510; suspected FSP-S hang
 		# The stock firmware exposes the WLAN behind the root port at 00:1c.0
 		# (PCH-LP ports are numbered from 1 at 1c.0), not 1c.3.
-		device ref pcie_rp1	on  end # Intel Wireless 7260
-		device ref pcie_rp9	on  end # Samsung NVMe SSD (00:1d.0)
+		device ref pcie_rp1	off end # Intel Wireless 7260 - disabled to isolate FSP-S hang
+		device ref pcie_rp9	off end # Samsung NVMe SSD (00:1d.0) - disabled to isolate FSP-S hang
 		device ref lpc_espi	on
 			register "serirq_mode" = "SERIRQ_CONTINUOUS"
 			# ITE IT85xx EC is reachable over LPC at 0x62/0x66 (ACPI EC
