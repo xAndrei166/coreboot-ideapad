@@ -66,6 +66,12 @@ void mainboard_memory_init_params(FSPM_UPD *mupd)
 	const u8 spd_index = get_memory_id();
 	uintptr_t spd_ptr = spd_cbfs_map(spd_index);
 
+	/* Route FSP-M/MRC debug to the JUART1 UART2 pads, verbosely. */
+	mem_cfg->PcdDebugInterfaceFlags = 0x12;	/* UART + Serial IO */
+	mem_cfg->PcdSerialIoUartNumber = 2;	/* LPSS UART2 */
+	mem_cfg->PcdSerialDebugBaudRate = 7;	/* 115200 */
+	mem_cfg->PcdSerialDebugLevel = 5;	/* verbose */
+
 	if (!spd_ptr)
 		die("SPD for memory ID not found in CBFS spd.bin!\n");
 

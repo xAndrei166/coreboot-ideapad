@@ -92,6 +92,7 @@ chip soc/intel/skylake
 		device ref i2c1		on  end # Wacom WCOM508C touchscreen/pen digitizer (0x4C)
 		device ref i2c2		on  end
 		device ref i2c3		on  end # Semtech SX9500F1 proximity/SAR sensor
+		device ref uart2	on  end # JUART1 debug console (GPP_C20/C21)
 		device ref heci1	on  end
 		device ref sata		on
 			register "SataPortsEnable" = "{
