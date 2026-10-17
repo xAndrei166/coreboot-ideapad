@@ -29,6 +29,13 @@ chip soc/intel/skylake
 
 	register "dptf_enable" = "false"
 
+	# Keep the JUART1 debug console alive: FSP-S must not re-mux UART2.
+	# Without this SerialIoDevMode defaults to Disabled and FspSiliconInit
+	# disables the UART, which looks like a hang.
+	register "SerialIoDevMode" = "{
+		[PchSerialIoIndexUart2] = PchSerialIoSkipInit,
+	}"
+
 	# FSP Configuration
 	register "DspEnable" = "false"
 	register "IoBufferOwnership" = "0"
