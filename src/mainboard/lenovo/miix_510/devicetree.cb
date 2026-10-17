@@ -94,11 +94,7 @@ chip soc/intel/skylake
 		device ref i2c3		on  end # Semtech SX9500F1 proximity/SAR sensor
 		device ref uart2	on  end # JUART1 debug console (GPP_C20/C21)
 		device ref heci1	on  end
-		device ref sata		on
-			register "SataPortsEnable" = "{
-				[0] = 1,
-			}"
-		end
+		device ref sata		off end # no SATA on Miix 510; suspected FSP-S hang
 		# The stock firmware exposes the WLAN behind the root port at 00:1c.0
 		# (PCH-LP ports are numbered from 1 at 1c.0), not 1c.3.
 		device ref pcie_rp1	on  end # Intel Wireless 7260
