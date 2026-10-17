@@ -47,7 +47,7 @@ chip soc/intel/skylake
 	device domain 0 on
 		device ref igpu		on  end
 		device ref sa_thermal	on  end
-		device ref imgu		on  end # Imaging Unit (ISP 00:05.0), enabled on stock firmware
+		device ref imgu		off end # Imaging Unit (ISP 00:05.0) - suspected FSP-S hang
 		device ref south_xhci	on
 			# coreboot writes PortUsb20Enable/PortUsb30Enable from these
 			# arrays; leaving them empty disables every port in the FSP.
@@ -87,7 +87,7 @@ chip soc/intel/skylake
 		end
 		device ref south_xdci	off end
 		device ref thermal	on  end
-		device ref cio		on  end # CSI-2 camera host (00:14.3). Drives FSP PchCio2Enable
+		device ref cio		off end # CSI-2 camera host (00:14.3) - suspected FSP-S hang
 		device ref i2c0		on  end # Bosch BOSC0200 accelerometer (0x18), touchpad slot
 		device ref i2c1		on  end # Wacom WCOM508C touchscreen/pen digitizer (0x4C)
 		device ref i2c2		on  end
