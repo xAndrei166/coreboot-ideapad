@@ -20,10 +20,25 @@
  *    the MRC only uses them for LPDDR3.
  *  - The factory code never sets DqPinsInterleaved, so memory-down DDR4 is
  *    routed non-interleaved (NIL), as on other DDR4 memory-down SKL/KBL-U boards.
- *  - RCOMP values are the SaPolicyPei defaults (equal to the FSP defaults).
+ *  - RCOMP is board-dependent. Schematic page 4 (BOM option table) gives
+ *    RM3/DDR_RCOMP0 = 200R for the SDP population (121R for DDP), RM1 =
+ *    100R and RM2 = 80.6R, i.e. {200, 81, 100} for a single die per
+ *    channel. This unit's SPD (byte 6 = 0, one rank, 8Gb x16) is the SDP
+ *    population, and the factory SaPolicyPei DDR4 profile uses the same
+ *    resistor set with RcompTarget {100, 40, 20, 20, 26}. The FSP
+ *    defaults are the LPDDR3 set. Wrong RCOMP values make the MRC's drive
+ *    strength calibration fail, which shows up as a reset/hang in FSP-M.
+ *  - CaVrefConfig = 2 is confirmed by the schematic: CH A's DRAM VREFCA is
+ *    tied to +V_DDR_CA_VREF (CPU DDR_VREF_CA), CH B's VREFCA to
+ *    +V_DDR_VREFDQ02_CHB (CPU DDR1_VREF_DQ).
+ *  - FSP-M documents the MemorySpdPtr* UPDs as pointers to SPD data in RAM.
+ *    The factory builds a private 512-byte copy per channel; do the same.
  */
 #define MEMORY_ID_COUNT		6
 #define MEMORY_ID_FALLBACK	3
+
+static u8 spd_ch0[CONFIG_DIMM_SPD_SIZE] __aligned(64);
+static u8 spd_ch1[CONFIG_DIMM_SPD_SIZE] __aligned(64);
 
 static u8 get_memory_id(void)
 {
@@ -44,14 +59,21 @@ void mainboard_memory_init_params(FSPM_UPD *mupd)
 		{ 0, 1, 3, 2, 4, 5, 6, 7 },
 		{ 1, 0, 4, 5, 2, 3, 6, 7 },
 	};
-	const u16 rcomp_resistors[3] = { 200, 81, 162 };
-	const u16 rcomp_targets[5]   = { 100, 40, 40, 23, 40 };
+	const u16 rcomp_resistors[3] = { 200, 81, 100 };
+	const u16 rcomp_targets[5]   = { 100, 40, 20, 20, 26 };
 
 	FSP_M_CONFIG *mem_cfg = &mupd->FspmConfig;
+	const u8 spd_index = get_memory_id();
+	uintptr_t spd_ptr = spd_cbfs_map(spd_index);
 
-	uintptr_t spd_ptr = spd_cbfs_map(get_memory_id());
 	if (!spd_ptr)
 		die("SPD for memory ID not found in CBFS spd.bin!\n");
+
+	memcpy(spd_ch0, (const void *)spd_ptr, sizeof(spd_ch0));
+	memcpy(spd_ch1, (const void *)spd_ptr, sizeof(spd_ch1));
+	printk(BIOS_DEBUG, "SPD %u: type %#x, rev %u.%u, CRC %04x\n", spd_index,
+	       spd_ch0[2], spd_ch0[1] >> 4, spd_ch0[1] & 0xf,
+	       spd_ch0[126] | spd_ch0[127] << 8);
 
 	memcpy(mem_cfg->DqByteMapCh0, dq_map[0], sizeof(mem_cfg->DqByteMapCh0));
 	memcpy(mem_cfg->DqByteMapCh1, dq_map[1], sizeof(mem_cfg->DqByteMapCh1));
@@ -63,8 +85,8 @@ void mainboard_memory_init_params(FSPM_UPD *mupd)
 	mem_cfg->DqPinsInterleaved = 0;
 	mem_cfg->CaVrefConfig = 2;	/* VREF_CA to CH_A, VREF_DQ_B to CH_B (DDR4) */
 	mem_cfg->MemorySpdDataLen = CONFIG_DIMM_SPD_SIZE;
-	mem_cfg->MemorySpdPtr00 = spd_ptr;
+	mem_cfg->MemorySpdPtr00 = (uintptr_t)spd_ch0;
 	mem_cfg->MemorySpdPtr01 = 0;
-	mem_cfg->MemorySpdPtr10 = spd_ptr;
+	mem_cfg->MemorySpdPtr10 = (uintptr_t)spd_ch1;
 	mem_cfg->MemorySpdPtr11 = 0;
 }
