@@ -35,15 +35,9 @@ static void enable_panel_backlight(void *unused)
 	/* Panel power sequencing timing + backlight PWM. */
 	graphics_soc_panel_init(igd);
 
-	/* Route panel power to the eDP port (DDI D, aux DDPD). */
-	v = read32(base + PCH_PP_ON_DELAYS);
-	v &= ~PANEL_PORT_SELECT_MASK;
-	v |= PANEL_PORT_SELECT_DPD;
-	write32(base + PCH_PP_ON_DELAYS, v);
-
-	/* Assert panel power and take the panel out of reset. */
+	/* Assert panel power and the eDP backlight enable, deassert reset. */
 	v = read32(base + PCH_PP_CONTROL);
-	v |= PANEL_POWER_ON;
+	v |= PANEL_POWER_ON | EDP_BLC_ENABLE;
 	v &= ~PANEL_POWER_RESET;
 	write32(base + PCH_PP_CONTROL, v);
 
