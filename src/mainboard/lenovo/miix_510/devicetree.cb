@@ -29,6 +29,13 @@ chip soc/intel/skylake
 
 	register "dptf_enable" = "false"
 
+	# WiFi (root port 4 / 1c.3) uses PCIE4 lanes, CLKOUT_PCIE5 (clock source 5)
+	# and SRCCLKREQ5# (CLKREQ 5). The SSD (root port 9 / 1d.0) uses the default
+	# CLKOUT_PCIE0, so it needs no override.
+	register "PcieRpClkSrcNumber[3]" = "5"
+	register "PcieRpClkReqSupport[3]" = "true"
+	register "PcieRpClkReqNumber[3]" = "5"
+
 	register "SerialIoDevMode" = "{
 		[PchSerialIoIndexI2C0] = PchSerialIoPci,
 		[PchSerialIoIndexI2C1] = PchSerialIoPci,
@@ -102,9 +109,9 @@ chip soc/intel/skylake
 		device ref uart2	off end
 		device ref heci1	on  end
 		device ref sata		off end # no SATA on Miix 510; suspected FSP-S hang
-		# The stock firmware exposes the WLAN behind the root port at 00:1c.0
-		# (PCH-LP ports are numbered from 1 at 1c.0), not 1c.3.
-		device ref pcie_rp1	on  end # Intel Wireless 7260
+		# WiFi (Intel 7260) is wired to PCIE4 data lanes = root port 4 (1c.3),
+		# REFCLK CLKOUT_PCIE5 (clock source 5), CLKREQ SRCCLKREQ5#.
+		device ref pcie_rp4	on  end # Intel Wireless 7260 (1c.3)
 		device ref pcie_rp9	on  end # Samsung NVMe SSD (00:1d.0)
 		device ref lpc_espi	on
 			register "serirq_mode" = "SERIRQ_CONTINUOUS"
